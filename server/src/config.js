@@ -8,7 +8,7 @@ module.exports = {
         username: 'appadmin',
         password: 'vFE7RFQat5tPhdUC',
         connectionString: isProduction
-            ? 'mongodb://mongo:27017/app'
+            ? 'mongodb://api_mongo:27017/app'
             : 'mongodb://127.0.0.1:27017/app'
     }
 }

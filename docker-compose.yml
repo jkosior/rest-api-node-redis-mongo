@@ -12,13 +12,13 @@ services:
         restart: on-failure
         depends_on:
             - redis
-            - mongo
+            - api_mongo
         ports:
             - "3000:3000"
         networks:
             - api_network
         environment:
-            WAIT_HOSTS: mongo:27017
+            WAIT_HOSTS: api_mongo:27017
 
     redis:
         image: "redis"
@@ -28,10 +28,10 @@ services:
         networks:
             - api_network
 
-    mongo:
+    api_mongo:
         build: ./mongo
-        image: "mongo"
-        container_name: "mongo"
+        image: "api_mongo"
+        container_name: "api_mongo"
         volumes:
             - ./mongo/dbfiles:/data/db:rw
         ports:

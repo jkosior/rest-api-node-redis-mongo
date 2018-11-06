@@ -1,0 +1,649 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "Movie api connected to http://omdbapi.com",
+        "version": "1.0.0",
+        "title": "Movie API",
+        "contact": {
+            "email": "jakubjkosior@gmail.com"
+        },
+        "license": {
+            "name": "MIT"
+        }
+    },
+    "host": "localhost:300",
+    "basePath": "/",
+    "schemes": [
+        "http"
+    ],
+    "paths": {
+        "/apikey": {
+            "get": {
+                "tags": [
+                    "apikey"
+                ],
+                "summary": "Generate api key",
+                "description": "Returns api key",
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "An api key",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "apikey": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/movies": {
+            "get": {
+                "tags": [
+                    "movies"
+                ],
+                "summary": "Gets all movies from database",
+                "description": "Returns a list containing all movies.",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "apikey",
+                        "required": true,
+                        "description": "Apikey required to get data",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "limit",
+                        "description": "Limits array by number given",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "from",
+                        "description": "Skips elements by numer given",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "sort_by",
+                        "description": "Sorts by given key. One of (Year, imdbRating)",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "sort_method",
+                        "description": "Sorts elements asc(1) or desc(-1)",
+                        "schema": {
+                            "type": "integer",
+                            "enum": [
+                                "1",
+                                "-1"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "A list of movies",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Movie"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Returns error message",
+                        "schema": {
+                            "$ref": "#/definitions/Message"
+                        }
+                    },
+                    "500": {
+                        "description": "Returns error message",
+                        "schema": {
+                            "$ref": "#/definitions/Message"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "movies"
+                ],
+                "summary": "Add new movie do database",
+                "description": "Adds movie from outer api to database. Requires one of title / id.",
+                "operationId": "addMovie",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "title",
+                        "description": "Adds movie by title or by id to database",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "apikey": {
+                                    "type": "string"
+                                },
+                                "Title": {
+                                    "type": "string"
+                                },
+                                "_id": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/Movie"
+                        }
+                    },
+                    "406": {
+                        "description": "Invalid input. Returns all matching movies",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Movie"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Returns error message",
+                        "schema": {
+                            "$ref": "#/definitions/Message"
+                        }
+                    }
+                }
+            }
+        },
+        "/movies/{id}": {
+            "get": {
+                "tags": [
+                    "movies/{id}"
+                ],
+                "summary": "Find movie by id",
+                "description": "Returns a single movie",
+                "operationId": "getMovieById",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "apikey",
+                        "required": true,
+                        "description": "apikey required to get data",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "id",
+                        "required": true,
+                        "description": "id needed to find a movie",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Found",
+                        "schema": {
+                            "$ref": "#/definitions/Movie"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "$ref": "#/definitions/Message"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/Message"
+                        }
+                    }
+                }
+            }
+        },
+        "/comments": {
+            "get": {
+                "tags": [
+                    "comments"
+                ],
+                "summary": "Get all comments",
+                "description": "Returns array of comments",
+                "operationId": "getAllComments",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "apikey",
+                        "required": true,
+                        "description": "apikey required to get data",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "limit",
+                        "description": "limits array to given number",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "from",
+                        "description": "Skips elements by given number",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query ",
+                        "name": "sort_method",
+                        "description": "sorts commnts by date asc(1) or desc(-1)",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Found",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Comment"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "$ref": "#/definitions/Message"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/Message"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "comments"
+                ],
+                "summary": "Adds comment to database",
+                "description": "",
+                "operationId": "addComment",
+                "consumes": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "required": true,
+                        "description": "apikey required to get data",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "apikey": {
+                                    "type": "string"
+                                },
+                                "text": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/Comment"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/Message"
+                        }
+                    }
+                }
+            }
+        },
+        "/comments/{id}": {
+            "get": {
+                "tags": [
+                    "comments/{id}"
+                ],
+                "summary": "Get comment by id",
+                "description": "Returns requested element",
+                "operationId": "getComment",
+                "consumes": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "required": true,
+                        "description": "apikey required to get data",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "apikey": {
+                                    "type": "string"
+                                },
+                                "_id": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Found",
+                        "schema": {
+                            "$ref": "#/definitions/Comment"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/Message"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/Message"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "comments/{id}"
+                ],
+                "summary": "Updates element",
+                "description": "Returns updated element",
+                "operationId": "updateComment",
+                "consumes": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "required": true,
+                        "description": "apikey required to get data",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "apikey": {
+                                    "type": "string"
+                                },
+                                "_id": {
+                                    "type": "string"
+                                },
+                                "text": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "oK",
+                        "schema": {
+                            "$ref": "#/definitions/Comment"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/Message"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/Message"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "comments/{id}"
+                ],
+                "summary": "Delete comment by id",
+                "description": "Deletes element",
+                "operationId": "deleteComment",
+                "consumes": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "required": true,
+                        "description": "apikey required to get data",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "apikey": {
+                                    "type": "string"
+                                },
+                                "_id": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Found",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "deleted": {
+                                    "type": "boolean"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/Message"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/Message"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "Movie": {
+            "type": "object",
+            "properties": {
+                "_id": {
+                    "type": "string"
+                },
+                "Title": {
+                    "type": "string"
+                },
+                "Year": {
+                    "type": "number"
+                },
+                "Rated": {
+                    "type": "string"
+                },
+                "Released": {
+                    "type": "string"
+                },
+                "Runtime": {
+                    "type": "string"
+                },
+                "Genre": {
+                    "type": "string",
+                    "enum": [
+                        "movie",
+                        "series",
+                        "episode"
+                    ]
+                },
+                "Director": {
+                    "type": "string"
+                },
+                "Writer": {
+                    "type": "string"
+                },
+                "Actors": {
+                    "type": "string"
+                },
+                "Plot": {
+                    "type": "string"
+                },
+                "Language": {
+                    "type": "string"
+                },
+                "Country": {
+                    "type": "string"
+                },
+                "Awards": {
+                    "type": "string"
+                },
+                "Poster": {
+                    "type": "string"
+                },
+                "Ratings": {
+                    "type": "array",
+                    "items": {
+                        "properties": {
+                            "Source": {
+                                "type": "string"
+                            },
+                            "Value": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                },
+                "Metascore": {
+                    "type": "string"
+                },
+                "imdbRating": {
+                    "type": "string"
+                },
+                "imdbVotes": {
+                    "type": "string"
+                },
+                "imdbID": {
+                    "type": "string"
+                },
+                "Type": {
+                    "type": "string"
+                },
+                "DVD": {
+                    "type": "string"
+                },
+                "BoxOffice": {
+                    "type": "string"
+                },
+                "Production": {
+                    "type": "string"
+                },
+                "Website": {
+                    "type": "string"
+                }
+            }
+        },
+        "Message": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "Comment": {
+            "type": "object",
+            "properties": {
+                "text": {
+                    "type": "string"
+                },
+                "date": {
+                    "type": "string"
+                },
+                "_id": {
+                    "type": "string"
+                }
+            }
+        }
+    },
+    "externalDocs": {
+        "description": "Find out more about Swagger",
+        "url": "http://swagger.io"
+    }
+}
